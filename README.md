@@ -1,2 +1,3 @@
-# Fiber
-Simple rest api to learn something about Fiber
+# Sales API in Fiber
+
+Sales API in Fiber
