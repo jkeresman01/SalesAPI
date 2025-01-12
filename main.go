@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v2/log"
+	"github.com/jkeresman01/SalesAPI/Model"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -28,4 +30,23 @@ func main() {
 	DB = db
 	fmt.Printf("Successful connection to %s", dbName)
 
+	err = AutoMigrate(DB)
+
+	if err != nil {
+		log.Error("DB auto migration has failed!")
+	}
+}
+
+func AutoMigrate(connection *gorm.DB) error {
+	err := connection.Debug().AutoMigrate(
+		&Model.Cashier{},
+		&Model.Category{},
+		&Model.Discount{},
+		&Model.Order{},
+		&Model.Payment{},
+		&Model.PaymentType{},
+		&Model.Product{},
+	)
+
+	return err
 }
