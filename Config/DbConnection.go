@@ -38,7 +38,7 @@ func Connect() {
 }
 
 func AutoMigrate(connection *gorm.DB) error {
-	err := connection.Debug().AutoMigrate(
+	return connection.Debug().AutoMigrate(
 		&Model.Cashier{},
 		&Model.Category{},
 		&Model.Discount{},
@@ -47,6 +47,4 @@ func AutoMigrate(connection *gorm.DB) error {
 		&Model.PaymentType{},
 		&Model.Product{},
 	)
-
-	return err
 }
