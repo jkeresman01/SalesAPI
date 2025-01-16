@@ -14,21 +14,21 @@ func CreateCashier(c *fiber.Ctx) error {
 	err := c.BodyParser(&data)
 
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Invalid data",
 		})
 	}
 
 	if data["passcode"] == "" {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Cashier passcode is required",
 		})
 	}
 
 	if data["name"] == "" {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Cashier name is required",
 		})
@@ -43,7 +43,7 @@ func CreateCashier(c *fiber.Ctx) error {
 
 	db.DB.Create(&cashier)
 
-	return c.Status(200).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Cashier added successfully",
 		"data":    cashier,
@@ -60,7 +60,7 @@ func GetCashiers(c *fiber.Ctx) error {
 
 	db.DB.Select("*").Limit(limit).Offset(skip).Find(&cashiers).Count(&count)
 
-	return c.Status(200).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Cashiers",
 		"data":    cashiers,
@@ -77,7 +77,7 @@ func GetCashierWithId(c *fiber.Ctx) error {
 	cashierData := make(map[string]interface{})
 
 	if cashier.Id == 0 {
-		return c.Status(404).JSON(fiber.Map{
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"success": false,
 			"message": "Cashier not found",
 			"error":   cashierData,
@@ -89,7 +89,7 @@ func GetCashierWithId(c *fiber.Ctx) error {
 	cashierData["createAt"] = cashier.CreatedAt
 	cashierData["updateAt"] = cashier.UpdatedAt
 
-	return c.Status(200).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "success",
 		"data":    cashierData,
@@ -104,7 +104,7 @@ func UpdateCashierWithId(c *fiber.Ctx) error {
 	db.DB.Select("*").Where("id=?", cashierId).Find(&cashier)
 
 	if cashier.Name == "" {
-		return c.Status(404).JSON(fiber.Map{
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"success": false,
 			"message": "Cashier not found",
 		})
@@ -114,14 +114,14 @@ func UpdateCashierWithId(c *fiber.Ctx) error {
 	err := c.BodyParser(&updatedCashier)
 
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Invalid data",
 		})
 	}
 
 	if cashier.Name == "" {
-		return c.Status(404).JSON(fiber.Map{
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"success": false,
 			"message": "Cashier name is requiered",
 		})
@@ -129,7 +129,7 @@ func UpdateCashierWithId(c *fiber.Ctx) error {
 
 	db.DB.Save(&updatedCashier)
 
-	return c.Status(200).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Success",
 		"data":    updatedCashier,
@@ -144,7 +144,7 @@ func DeleteCashierWithId(c *fiber.Ctx) error {
 	db.DB.Where("id=?", cashierId).First(&cashier)
 
 	if cashier.Id == 0 {
-		return c.Status(404).JSON(fiber.Map{
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"success": false,
 			"message": "Cashier not found",
 		})
@@ -152,7 +152,7 @@ func DeleteCashierWithId(c *fiber.Ctx) error {
 
 	db.DB.Where("id=?", cashierId).Delete(&cashier)
 
-	return c.Status(200).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Cashier delete successfully",
 	})

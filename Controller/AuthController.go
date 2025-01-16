@@ -18,14 +18,14 @@ func Login(c *fiber.Ctx) error {
 	err := c.BodyParser(&data)
 
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Invalid post request",
 		})
 	}
 
 	if data["passcode"] == "" {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Passcode is required",
 			"error":   map[string]interface{}{},
@@ -37,7 +37,7 @@ func Login(c *fiber.Ctx) error {
 	db.DB.Where("id=?", cashierId).First(&cashier)
 
 	if cashier.Id == 0 {
-		return c.Status(401).JSON(fiber.Map{
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "Cashier not found",
 			"error":   map[string]interface{}{},
@@ -45,7 +45,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	if cashier.Passcode != data["passcode"] {
-		return c.Status(401).JSON(fiber.Map{
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "Passcode not matched",
 			"error":   map[string]interface{}{},
@@ -60,7 +60,7 @@ func Login(c *fiber.Ctx) error {
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 
 	if err != nil {
-		return c.Status(401).JSON(fiber.Map{
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "Token expired or invalid",
 		})
@@ -69,7 +69,7 @@ func Login(c *fiber.Ctx) error {
 	cashierData := make(map[string]interface{})
 	cashierData["token"] = tokenString
 
-	return c.Status(200).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Success",
 		"data":    cashierData,
