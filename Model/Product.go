@@ -16,3 +16,14 @@ type Product struct {
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"Updated_at"`
 }
+
+type ProductResult struct {
+	Id       int      `json:"productId" gorm:"type:INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;primaryKey"`
+	Sku      string   `json:"sku"`
+	Name     string   `json:"name"`
+	Stock    int      `json:"stock"`
+	Price    int      `json:"price"`
+	Image    string   `json:"image"`
+	Category Category `json:"category"`
+	Discount Discount `json:"discount"`
+}
