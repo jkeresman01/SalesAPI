@@ -124,3 +124,23 @@ func CreateOrder(c *fiber.Ctx) error {
 
 	}
 }
+
+func GetOrders(c *fiber.Ctx) error {
+	return nil
+}
+
+func GetOrderWithId(c *fiber.Ctx) error {
+	return nil
+}
+
+func SubTotalOrders(c *fiber.Ctx) error {
+	return nil
+}
+
+func DownloadOrder(c *fiber.Ctx) error {
+	return nil
+}
+
+func CheckOrder(c *fiber.Ctx) error {
+	return nil
+}
