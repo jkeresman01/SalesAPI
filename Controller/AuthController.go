@@ -77,9 +77,72 @@ func Login(c *fiber.Ctx) error {
 }
 
 func Logout(c *fiber.Ctx) error {
-	return nil
+	cashierId := c.Params("cashierId")
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	if data["passcode"] == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Passcode is required",
+		})
+	}
+
+	var cashier Model.Cashier
+	db.DB.Where("id=?", cashierId).First(&cashierId)
+
+	if cashier.Id == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"success": false,
+			"message": "Cashier not found",
+		})
+	}
+
+	if cashier.Passcode != data["passocde"] {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Passcode not match",
+		})
+	}
+
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+	}
+
+	c.Cookie(&cookie)
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "success",
+	})
 }
 
 func Passcode(c *fiber.Ctx) error {
-	return nil
+	cashierId := c.Params("cashiedId")
+
+	var cashier Model.Cashier
+	db.DB.Select("id,name,passcode").Where("id=?").First(&cashierId)
+
+	if cashier.Name == "" || cashier.Id == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"success": true,
+			"message": "Cashier not found",
+			"error":   map[string]interface{}{},
+		})
+	}
+
+	cashierData := make(map[string]interface{})
+	cashierData["passcode"] = cashier.Passcode
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "success",
+		"data":    cashierData,
+	})
 }
