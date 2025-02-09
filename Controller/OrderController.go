@@ -287,8 +287,61 @@ func CheckOrder(c *fiber.Ctx) error {
 	return nil
 }
 
-func SubTotalOrders(c *fiber.Ctx) error {
-	return nil
+func GetOrders(c *fiber.Ctx) error {
+	limit, _ := strconv.Atoi(c.Query("limit"))
+	skip, _ := strconv.Atoi(c.Query("skip"))
+
+	var count int64
+	var order []Model.Order
+
+	db.DB.Select("*").Limit(limit).Offset(skip).Find(&order).Count(&count)
+
+	type OrderList struct {
+		OrderId        int               `json:"orderId"`
+		CashierID      int               `json:"cashiersId"`
+		PaymentTypesId int               `json:"paymentTypesId"`
+		TotalPrice     int               `json:"totalPrice"`
+		TotalPaid      int               `json:"totalPaid"`
+		TotalReturn    int               `json:"totalReturn"`
+		ReceiptId      string            `json:"receiptId"`
+		CreatedAt      time.Time         `json:"createdAt"`
+		Payments       Model.PaymentType `json:"payment_type"`
+		Cashiers       Model.Cashier     `json:"cashier"`
+	}
+
+	OrderResponse := make([]*OrderList, 0)
+
+	for _, v := range order {
+		cashier := Model.Cashier{}
+		db.DB.Where("id=?", v.CashierId).Find(&cashier)
+
+		paymentType := Model.PaymentType{}
+		db.DB.Where("id=?", v.PaymentTypeId).Find(&paymentType)
+
+		OrderResponse = append(OrderResponse, &OrderList{
+			OrderId:        v.Id,
+			CashierID:      v.CashierId,
+			PaymentTypesId: v.PaymentTypeId,
+			TotalPrice:     v.TotalPrice,
+			TotalPaid:      v.TotalPaid,
+			TotalReturn:    v.TotalReturn,
+			ReceiptId:      v.ReceiptId,
+			CreatedAt:      v.CreatedAt,
+			Payments:       paymentType,
+			Cashiers:       cashier,
+		})
+	}
+
+	return c.Status(404).JSON(fiber.Map{
+		"success": true,
+		"message": "success",
+		"data":    OrderResponse,
+		"meta": map[string]interface{}{
+			"total": count,
+			"limit": limit,
+			"skip":  skip,
+		},
+	})
 }
 
 func DownloadOrder(c *fiber.Ctx) error {
